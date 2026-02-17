@@ -59,11 +59,16 @@ export function detectBank(text: string): string {
 
 export function buildDescription(text: string): string {
   let t = String(text || "").trim();
-  t = t.replace(/(\d{1,6})([,.]\d{1,2})?/, "").trim();
-  t = t.replace(/\b(nubank|nu|inter|itau|itaú|bradesco|santander|caixa|bb|banco do brasil|pix|dinheiro)\b/gi, "").trim();
+  t = t.replace(/\b(r\$|brl)\b/gi, " ").trim();
+  t = t.replace(/(\d{1,6})([,.]\d{1,2})?/, " ").trim();
+  t = t.replace(
+    /\b(nubank|nu|inter|itau|itaú|bradesco|santander|caixa|bb|banco do brasil|pix|dinheiro)\b/gi,
+    " "
+  ).trim();
   t = t.replace(/\s+/g, " ").trim();
   return t || "Sem descrição";
 }
+
 
 export function newEventId(): string {
   return crypto.randomUUID();
