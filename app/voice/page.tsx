@@ -38,6 +38,20 @@ const SettingsIcon = () => (
   </svg>
 );
 
+const EyeIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+        <circle cx="12" cy="12" r="3"></circle>
+    </svg>
+);
+
+const EyeOffIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+        <line x1="1" y1="1" x2="23" y2="23"></line>
+    </svg>
+);
+
 const funnySuccessPhrases = [
   "Dinheiro bem gasto!",
   "Anotado, chefe!",
@@ -61,11 +75,11 @@ const getRandomFunnyPhrase = () => funnySuccessPhrases[Math.floor(Math.random() 
 const renderMoneyRain = (count: number) => {
   const moneySymbols = [];
   for (let i = 0; i < count; i++) {
-    const delay = Math.random() * 10; // seconds
-    const duration = 5 + Math.random() * 5; // seconds
-    const left = Math.random() * 100; // percentage
-    const size = 15 + Math.random() * 15; // px
-    const opacity = 0.5 + Math.random() * 0.5; // 0.5 to 1
+    const delay = Math.random() * 10;
+    const duration = 5 + Math.random() * 5;
+    const left = Math.random() * 100;
+    const size = 15 + Math.random() * 15;
+    const opacity = 0.5 + Math.random() * 0.5;
 
     moneySymbols.push(
       <span
@@ -73,13 +87,13 @@ const renderMoneyRain = (count: number) => {
         style={{
           position: 'absolute',
           left: `${left}vw`,
-          top: `-${size}px`, // Start above the screen
+          top: `-${size}px`,
           fontSize: `${size}px`,
           opacity: opacity,
-          color: '#4CAF50', // Green for money
+          color: '#4CAF50',
           animation: `moneyFall ${duration}s linear ${delay}s infinite`,
-          zIndex: 1, // Above main container background
-          pointerEvents: 'none', // Don't block interactions
+          zIndex: 1,
+          pointerEvents: 'none',
         }}
       >
         $
@@ -100,6 +114,8 @@ export default function VoiceGastoPage() {
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [moneyRain, setMoneyRain] = useState<React.ReactNode>(null);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isPasswordPreFilled, setIsPasswordPreFilled] = useState(false);
   const recognitionRef = useRef<any>(null);
   const statusTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -111,6 +127,7 @@ export default function VoiceGastoPage() {
     const storedUserName = localStorage.getItem('gastos_user_name');
     if (storedApiKey) {
       setApiKey(storedApiKey);
+      setIsPasswordPreFilled(true);
       if (storedUserName) setUserName(storedUserName);
       setShowSettings(false);
     } else {
@@ -184,27 +201,21 @@ export default function VoiceGastoPage() {
     setStatus('Enviando...');
     setAwaitingConfirmation(false);
 
-    // Clear any existing timeout
     if (statusTimeoutRef.current) clearTimeout(statusTimeoutRef.current);
 
     try {
       const response = await fetch('/api/gasto', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-        },
+        headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
         body: JSON.stringify({ text: transcript }),
       });
 
       const data = await response.json();
       if (response.ok) {
         setStatus(`Salvo: ${data.event?.amountBRL} em ${data.event?.description}`);
-
         statusTimeoutRef.current = setTimeout(() => {
           setStatus(getRandomFunnyPhrase());
         }, 2000);
-
       } else {
         setStatus(`Erro: ${data.error || response.statusText}`);
       }
@@ -214,7 +225,7 @@ export default function VoiceGastoPage() {
       setTranscript('');
       statusTimeoutRef.current = setTimeout(() => {
         setStatus('Clique no microfone para começar');
-      }, 5000);
+      }, 6000);
     }
   };
 
@@ -235,9 +246,7 @@ export default function VoiceGastoPage() {
     if (newKey) {
       setStatus('Verificando senha...');
       try {
-        const response = await fetch('/api/user', {
-          headers: { 'x-api-key': newKey },
-        });
+        const response = await fetch('/api/user', { headers: { 'x-api-key': newKey } });
         const data = await response.json();
         if (response.ok && data.user?.name) {
           setUserName(data.user.name);
@@ -269,8 +278,8 @@ export default function VoiceGastoPage() {
       height: '100vh',
       padding: '2rem',
       boxSizing: 'border-box',
-      overflow: 'hidden', // Prevent scrollbars due to money rain
-      position: 'relative', // For z-index context
+      overflow: 'hidden',
+      position: 'relative',
     },
     header: {
       width: '100%',
@@ -278,8 +287,8 @@ export default function VoiceGastoPage() {
       justifyContent: 'space-between',
       alignItems: 'center',
       textAlign: 'left',
-      zIndex: 10, // Above money rain
-      position: 'relative', // For z-index context
+      zIndex: 10,
+      position: 'relative',
     },
     headerTitle: { fontSize: '1.2rem', color: '#888', margin: '0 0 0.5rem 0' },
     welcomeMessage: { fontSize: '1.1rem', color: '#fff', fontWeight: 'bold', margin: 0 },
@@ -290,8 +299,8 @@ export default function VoiceGastoPage() {
       alignItems: 'center',
       justifyContent: 'center',
       textAlign: 'center',
-      zIndex: 10, // Above money rain
-      position: 'relative', // For z-index context
+      zIndex: 10,
+      position: 'relative',
     },
     micButton: {
       width: '120px',
@@ -314,22 +323,35 @@ export default function VoiceGastoPage() {
     cancelButton: { backgroundColor: '#6c757d', color: 'white' },
     settingsButton: { background: 'none', border: 'none', color: '#888', cursor: 'pointer' },
     settingsPanel: { backgroundColor: '#1c1c1e', padding: '1.5rem', borderRadius: '12px', width: '100%', maxWidth: '400px', boxSizing: 'border-box', textAlign: 'left', zIndex: 10, position: 'relative' },
-    input: { width: '100%', padding: '0.8rem', border: '1px solid #444', borderRadius: '8px', backgroundColor: '#333', color: '#fff', fontSize: '1rem', boxSizing: 'border-box' }
+    inputContainer: { position: 'relative', width: '100%' },
+    input: {
+      width: '100%',
+      padding: '0.8rem 2.5rem 0.8rem 0.8rem',
+      border: '1px solid #444',
+      borderRadius: '8px',
+      backgroundColor: '#333',
+      color: '#fff',
+      fontSize: '1rem',
+      boxSizing: 'border-box',
+    },
+    eyeButton: {
+      position: 'absolute',
+      right: '10px',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      background: 'none',
+      border: 'none',
+      color: '#888',
+      cursor: 'pointer',
+    },
   };
 
   return (
     <div style={styles.container}>
-      {/* CSS Keyframes for money rain */}
       <style jsx global>{`
         @keyframes moneyFall {
-          0% {
-            transform: translateY(-10vh) rotate(0deg);
-            opacity: 1;
-          }
-          100% {
-            transform: translateY(110vh) rotate(720deg);
-            opacity: 0;
-          }
+          0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+          100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
         }
       `}</style>
       {moneyRain}
@@ -349,14 +371,26 @@ export default function VoiceGastoPage() {
           <label htmlFor="apiKey" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
             Senha:
           </label>
-          <input
-            type="password"
-            id="apiKey"
-            value={apiKey}
-            onChange={handleApiKeyChange}
-            placeholder="Sua senha secreta"
-            style={styles.input}
-          />
+          <div style={styles.inputContainer}>
+            <input
+              type={isPasswordVisible ? 'text' : 'password'}
+              id="apiKey"
+              value={isPasswordPreFilled ? '' : apiKey}
+              onChange={(e) => {
+                setIsPasswordPreFilled(false);
+                handleApiKeyChange(e);
+              }}
+              placeholder={isPasswordPreFilled ? "Senha já configurada. Digite para alterar." : "Sua senha secreta"}
+              style={styles.input}
+            />
+            <button
+              onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+              style={styles.eyeButton}
+              aria-label={isPasswordVisible ? 'Esconder senha' : 'Mostrar senha'}
+            >
+              {isPasswordVisible ? <EyeOffIcon /> : <EyeIcon />}
+            </button>
+          </div>
         </div>
       )}
 
