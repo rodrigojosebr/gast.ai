@@ -15,21 +15,21 @@ Para manter a organização, utilizaremos o seguinte fluxo:
 ## 🎨 1. Estilização e UI Declarativa
 O objetivo é remover os estilos inline (`const styles = {...}`) e adotar uma solução robusta, type-safe e performática.
 
-- [ ] **Instalar e Configurar PandaCSS**
+- [x] **Instalar e Configurar PandaCSS**
     - Escolha ideal para Next.js (Server Components) pois é *zero-runtime* e *type-safe*.
     - Permite criar "Recipes" (receitas) para variantes de componentes (ex: botão primário/secundário).
-- [ ] **Migrar Estilos Inline para PandaCSS**
+- [x] **Migrar Estilos Inline para PandaCSS**
     - Converter o layout flexbox global.
     - Criar padrões de tokens (cores, espaçamentos) no arquivo de configuração.
 
 ## 🧩 2. Componentização e Arquitetura
 O objetivo é "quebrar" o arquivo gigante `page.tsx` em partes menores e reutilizáveis.
 
-- [ ] **Atomic Design (Pastas)**
+- [x] **Atomic Design (Pastas)**
     - `components/ui`: Botões, Inputs, Selects (burros/sem lógica).
     - `components/features`: Painel de Configuração, Botão do Microfone (com contexto).
     - `components/layout`: Header, Footer.
-- [ ] **Extração de Componentes**
+- [x] **Extração de Componentes**
     - Mover `MicIcon`, `SettingsIcon`, `MoneyRain` para arquivos isolados.
     - Criar componente `SettingsDrawer` (Gaveta de configurações).
 
