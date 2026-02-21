@@ -8,49 +8,25 @@ declare global {
 }
 
 import { useState, useRef, useEffect } from 'react';
+import { css } from '../../styled-system/css';
 
-// --- Helper Components ---
+// Layout
+import { Container } from '../../components/layout/Container';
+import { Header } from '../../components/layout/Header';
+import { MainContent } from '../../components/layout/MainContent';
 
-const MicIcon = ({ recording }: { recording: boolean }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="48"
-    height="48"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    style={{ color: recording ? '#ff5252' : '#fff' }}
-  >
-    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-    <line x1="12" y1="19" x2="12" y2="23"></line>
-    <line x1="8" y1="23" x2="16" y2="23"></line>
-  </svg>
-);
+// UI
+import { MicIcon } from '../../components/ui/MicIcon';
+import { SettingsIcon } from '../../components/ui/SettingsIcon';
+import { EyeIcon, EyeOffIcon } from '../../components/ui/EyeIcons';
+import { ActionButton } from '../../components/ui/ActionButton';
+import { TextInput } from '../../components/ui/TextInput';
+import { SelectInput } from '../../components/ui/SelectInput';
 
-const SettingsIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="3"></circle>
-    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-  </svg>
-);
-
-const EyeIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-    <circle cx="12" cy="12" r="3"></circle>
-  </svg>
-);
-
-const EyeOffIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-    <line x1="1" y1="1" x2="23" y2="23"></line>
-  </svg>
-);
+// Features
+import { MoneyRain } from '../../components/features/MoneyRain';
+import { SettingsPanel } from '../../components/features/SettingsPanel';
+import { MicButton } from '../../components/features/MicButton';
 
 const funnySuccessPhrases = [
   "Dinheiro bem gasto!",
@@ -81,40 +57,6 @@ const funnySuccessPhrases = [
 
 const getRandomFunnyPhrase = () => funnySuccessPhrases[Math.floor(Math.random() * funnySuccessPhrases.length)];
 
-// Generate a number of '$' symbols with random properties for the rain effect
-const renderMoneyRain = (count: number) => {
-  const moneySymbols = [];
-  for (let i = 0; i < count; i++) {
-    const delay = Math.random() * 10;
-    const duration = 5 + Math.random() * 5;
-    const left = Math.random() * 100;
-    const size = 15 + Math.random() * 15;
-    const opacity = 0.5 + Math.random() * 0.5;
-
-    moneySymbols.push(
-      <span
-        key={i}
-        style={{
-          position: 'absolute',
-          left: `${left}vw`,
-          top: `-${size}px`,
-          fontSize: `${size}px`,
-          opacity: opacity,
-          color: '#4CAF50',
-          animation: `moneyFall ${duration}s linear ${delay}s infinite`,
-          zIndex: 1,
-          pointerEvents: 'none',
-        }}
-      >
-        $
-      </span>
-    );
-  }
-  return moneySymbols;
-};
-
-// --- Main Page Component ---
-
 export default function VoiceGastoPage() {
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState('');
@@ -123,7 +65,6 @@ export default function VoiceGastoPage() {
   const [userName, setUserName] = useState('');
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [moneyRain, setMoneyRain] = useState<React.ReactNode>(null);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isPasswordPreFilled, setIsPasswordPreFilled] = useState(false);
   const recognitionRef = useRef<any>(null);
@@ -131,10 +72,8 @@ export default function VoiceGastoPage() {
   const settingsPanelRef = useRef<HTMLDivElement>(null);
   const settingsButtonRef = useRef<HTMLButtonElement>(null);
 
-  // Load API key and user name, and render money rain only on client
+  // Load API key and user name
   useEffect(() => {
-    setMoneyRain(renderMoneyRain(50));
-
     const storedApiKey = localStorage.getItem('gastos_api_key');
     const storedUserName = localStorage.getItem('gastos_user_name');
     if (storedApiKey) {
@@ -148,7 +87,7 @@ export default function VoiceGastoPage() {
     }
   }, []);
 
-  // Close settings when clicking outside or pressing Escape
+  // Close settings when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -162,18 +101,20 @@ export default function VoiceGastoPage() {
       }
     };
 
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showSettings]);
+
+  // Close settings on Escape key
+  useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setShowSettings(false);
     };
-
-    document.addEventListener('mousedown', handleClickOutside);
     window.addEventListener('keydown', handleEsc);
-    
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      window.removeEventListener('keydown', handleEsc);
-    };
-  }, [showSettings]);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, []);
 
   // Initialize Speech Recognition
   useEffect(() => {
@@ -361,324 +302,321 @@ export default function VoiceGastoPage() {
     document.body.removeChild(link);
   };
 
-
-
-
-
-  // --- Styles ---
-  const styles: { [key: string]: React.CSSProperties } = {
-    container: {
-      backgroundColor: '#121212',
-      color: '#e0e0e0',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      minHeight: '100vh',
-      padding: '2rem',
-      boxSizing: 'border-box',
-      overflowY: 'auto',
-      position: 'relative',
-    },
-    settingsPanel: {
-      backgroundColor: '#1c1c1e',
-      padding: '1.5rem',
-      borderRadius: '12px',
-      width: '100%',
-      maxWidth: '400px',
-      boxSizing: 'border-box',
-      textAlign: 'left',
-      zIndex: 10,
-      position: 'relative',
-      marginTop: '1rem',
-      marginBottom: '1rem',
-      boxShadow: '0 4px 6px rgba(0,0,0,0.3)',
-      flexShrink: 0,
-    },
-    header: {
-      width: '100%',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      textAlign: 'left',
-      zIndex: 10,
-      position: 'relative',
-      flexShrink: 0,
-    },
-    headerTitle: { fontSize: '1.2rem', color: '#888', margin: '0 0 0.5rem 0' },
-    welcomeMessage: { fontSize: '1.1rem', color: '#fff', fontWeight: 'bold', margin: 0 },
-    mainContent: {
-      flex: 1,
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      textAlign: 'center',
-      zIndex: 10,
-      position: 'relative',
-      width: '100%',
-      marginTop: showSettings ? '0' : '2rem',
-    },
-    micButton: {
-      width: '120px',
-      height: '120px',
-      borderRadius: '50%',
-      backgroundColor: isRecording ? '#333' : '#007aff',
-      border: 'none',
-      cursor: 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      transition: 'all 0.3s ease',
-      boxShadow: isRecording ? '0 0 0 10px rgba(255, 82, 82, 0.5), 0 0 0 20px rgba(255, 82, 82, 0.3)' : '0 4px 15px rgba(0, 122, 255, 0.4)',
-    },
-    statusText: { marginTop: '2rem', fontSize: '1.4rem', minHeight: '2em', color: '#ffffff', fontWeight: 'bold' },
-    transcript: { fontSize: '1.8rem', fontWeight: '500', minHeight: '2.5em', color: '#fff', padding: '0 1rem' },
-    confirmationButtons: { marginTop: '1.5rem', display: 'flex', gap: '1rem' },
-    button: { padding: '0.9rem 1.6rem', fontSize: '1rem', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: 'pointer', transition: 'opacity 0.2s' },
-    confirmButton: { backgroundColor: '#4CAF50', color: 'white' },
-    cancelButton: { backgroundColor: '#6c757d', color: 'white' },
-    settingsButton: { background: 'none', border: 'none', color: '#888', cursor: 'pointer' },
-    inputContainer: { position: 'relative', width: '100%' },
-    input: {
-      width: '100%',
-      padding: '0.8rem 2.5rem 0.8rem 0.8rem',
-      border: '1px solid #444',
-      borderRadius: '8px',
-      backgroundColor: '#333',
-      color: '#fff',
-      fontSize: '1rem',
-      boxSizing: 'border-box',
-    },
-    eyeButton: {
-      position: 'absolute',
-      right: '10px',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      background: 'none',
-      border: 'none',
-      color: '#888',
-      cursor: 'pointer',
-    },
-  };
-
   return (
-    <div style={styles.container}>
-      <style jsx global>{`
-        @keyframes moneyFall {
-          0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
-          100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
-        }
-      `}</style>
-      {moneyRain}
+    <Container>
+      <MoneyRain count={50} />
 
-      <header style={styles.header}>
+      <Header>
         <div>
-          <h1 style={styles.headerTitle}>Registro de gastos</h1>
-          {userName && <p style={styles.welcomeMessage}>Bem-vindo, {userName}!</p>}
+          <h1
+            className={css({
+              fontSize: '1.2rem',
+              color: '#888',
+              margin: '0 0 0.5rem 0',
+            })}
+          >
+            Registro de gastos
+          </h1>
+          {userName && (
+            <p
+              className={css({
+                fontSize: '1.1rem',
+                color: '#fff',
+                fontWeight: 'bold',
+                margin: 0,
+              })}
+            >
+              Bem-vindo, {userName}!
+            </p>
+          )}
         </div>
-        <button 
+        <button
           ref={settingsButtonRef}
-          onClick={() => setShowSettings(!showSettings)} 
-          style={styles.settingsButton} 
+          onClick={() => setShowSettings(!showSettings)}
+          className={css({
+            background: 'none',
+            border: 'none',
+            color: '#888',
+            cursor: 'pointer',
+          })}
           aria-label="Configurações"
         >
           <SettingsIcon />
         </button>
-      </header>
+      </Header>
 
       {showSettings && (
-        <div ref={settingsPanelRef} style={styles.settingsPanel}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <h2 style={{ margin: 0, fontSize: '1.2rem' }}>Configurações</h2>
-            <button 
-              onClick={() => setShowSettings(false)} 
-              style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', padding: '5px' }}
-              aria-label="Fechar"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
-          </div>
-
-          <label htmlFor="apiKey" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-            Senha:
-          </label>
-          <div style={styles.inputContainer}>
-            <input
-              type={isPasswordVisible ? 'text' : 'password'}
-              id="apiKey"
-              value={isPasswordPreFilled ? '' : apiKey}
-              onChange={(e) => {
-                setIsPasswordPreFilled(false);
-                handleApiKeyChange(e);
+        <div ref={settingsPanelRef}>
+          <SettingsPanel>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '1.5rem',
               }}
-              placeholder={isPasswordPreFilled ? "Senha já configurada. Digite para alterar." : "Sua senha secreta"}
-              style={styles.input}
-            />
-            <button
-              onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-              style={styles.eyeButton}
-              aria-label={isPasswordVisible ? 'Esconder senha' : 'Mostrar senha'}
             >
-              {isPasswordVisible ? <EyeOffIcon /> : <EyeIcon />}
-            </button>
-          </div>
+              <h2 style={{ margin: 0, fontSize: '1.2rem' }}>Configurações</h2>
+              <button
+                onClick={() => setShowSettings(false)}
+                className={css({
+                  background: 'none',
+                  border: 'none',
+                  color: '#888',
+                  cursor: 'pointer',
+                  padding: '5px',
+                })}
+                aria-label="Fechar"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
 
-          <hr style={{ borderColor: '#444', margin: '1.5rem 0 1rem 0' }} />
+            <label
+              htmlFor="apiKey"
+              style={{
+                display: 'block',
+                marginBottom: '0.5rem',
+                fontWeight: 'bold',
+              }}
+            >
+              Senha:
+            </label>
+            <div className={css({ position: 'relative', width: '100%' })}>
+              <TextInput
+                type={isPasswordVisible ? 'text' : 'password'}
+                id="apiKey"
+                value={isPasswordPreFilled ? '' : apiKey}
+                onChange={(e) => {
+                  setIsPasswordPreFilled(false);
+                  handleApiKeyChange(e);
+                }}
+                placeholder={
+                  isPasswordPreFilled
+                    ? 'Senha já configurada. Digite para alterar.'
+                    : 'Sua senha secreta'
+                }
+              />
+              <button
+                onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+                className={css({
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  color: '#888',
+                  cursor: 'pointer',
+                })}
+                aria-label={isPasswordVisible ? 'Esconder senha' : 'Mostrar senha'}
+              >
+                {isPasswordVisible ? <EyeOffIcon /> : <EyeIcon />}
+              </button>
+            </div>
 
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
-            Exportar dados:
-          </label>
-          
-          <div style={{ display: 'flex', marginBottom: '1rem', backgroundColor: '#333', borderRadius: '8px', padding: '0.2rem' }}>
-             <button
+            <hr
+              style={{ borderColor: '#444', margin: '1.5rem 0 1rem 0' }}
+            />
+
+            <label
+              style={{
+                display: 'block',
+                marginBottom: '0.5rem',
+                fontWeight: 'bold',
+              }}
+            >
+              Exportar dados:
+            </label>
+
+            <div
+              style={{
+                display: 'flex',
+                marginBottom: '1rem',
+                backgroundColor: '#333',
+                borderRadius: '8px',
+                padding: '0.2rem',
+              }}
+            >
+              <button
                 onClick={() => setExportMode('current')}
-                style={{
+                className={css({
                   flex: 1,
                   padding: '0.6rem',
                   border: 'none',
                   borderRadius: '6px',
-                  backgroundColor: exportMode === 'current' ? '#007aff' : 'transparent',
+                  backgroundColor:
+                    exportMode === 'current' ? '#007aff' : 'transparent',
                   color: exportMode === 'current' ? 'white' : '#aaa',
                   cursor: 'pointer',
                   fontSize: '0.9rem',
                   fontWeight: '500',
-                  transition: 'all 0.2s'
-                }}
-             >
-               Mês Atual
-             </button>
-             <button
+                  transition: 'all 0.2s',
+                })}
+              >
+                Mês Atual
+              </button>
+              <button
                 onClick={() => setExportMode('previous')}
-                style={{
+                className={css({
                   flex: 1,
                   padding: '0.6rem',
                   border: 'none',
                   borderRadius: '6px',
-                  backgroundColor: exportMode === 'previous' ? '#007aff' : 'transparent',
+                  backgroundColor:
+                    exportMode === 'previous' ? '#007aff' : 'transparent',
                   color: exportMode === 'previous' ? 'white' : '#aaa',
                   cursor: 'pointer',
                   fontSize: '0.9rem',
                   fontWeight: '500',
-                  transition: 'all 0.2s'
-                }}
-             >
-               Mês Anterior
-             </button>
-             <button
+                  transition: 'all 0.2s',
+                })}
+              >
+                Mês Anterior
+              </button>
+              <button
                 onClick={() => setExportMode('custom')}
-                style={{
+                className={css({
                   flex: 1,
                   padding: '0.6rem',
                   border: 'none',
                   borderRadius: '6px',
-                  backgroundColor: exportMode === 'custom' ? '#007aff' : 'transparent',
+                  backgroundColor:
+                    exportMode === 'custom' ? '#007aff' : 'transparent',
                   color: exportMode === 'custom' ? 'white' : '#aaa',
                   cursor: 'pointer',
                   fontSize: '0.9rem',
                   fontWeight: '500',
-                  transition: 'all 0.2s'
-                }}
-             >
-               Personalizado
-             </button>
-          </div>
-
-          {exportMode === 'custom' && (
-            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', alignItems: 'center' }}>
-              <select
-                value={customFrom}
-                onChange={(e) => setCustomFrom(e.target.value)}
-                style={{
-                  flex: 1,
-                  padding: '0.8rem',
-                  borderRadius: '8px',
-                  border: '1px solid #444',
-                  backgroundColor: '#333',
-                  color: '#fff',
-                  fontSize: '0.9rem',
-                  cursor: 'pointer',
-                }}
+                  transition: 'all 0.2s',
+                })}
               >
-                {last24Months.map((m) => (
-                  <option key={m} value={m}>
-                    {m}
-                  </option>
-                ))}
-              </select>
-              <span style={{ color: '#888' }}>até</span>
-              <select
-                value={customTo}
-                onChange={(e) => setCustomTo(e.target.value)}
-                style={{
-                  flex: 1,
-                  padding: '0.8rem',
-                  borderRadius: '8px',
-                  border: '1px solid #444',
-                  backgroundColor: '#333',
-                  color: '#fff',
-                  fontSize: '0.9rem',
-                  cursor: 'pointer',
-                }}
-              >
-                {last24Months.map((m) => (
-                  <option key={m} value={m}>
-                    {m}
-                  </option>
-                ))}
-              </select>
+                Personalizado
+              </button>
             </div>
-          )}
 
-          <button
-            onClick={downloadCsv}
-            style={{
-              width: '100%',
-              padding: '0.8rem',
-              backgroundColor: '#217346',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '0.5rem'
-            }}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            Baixar CSV {exportMode === 'custom' ? '(Período)' : exportMode === 'previous' ? '(Mês Anterior)' : '(Mês Atual)'}
-          </button>
+            {exportMode === 'custom' && (
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '0.5rem',
+                  marginBottom: '1rem',
+                  alignItems: 'center',
+                }}
+              >
+                <SelectInput
+                  value={customFrom}
+                  onChange={(e) => setCustomFrom(e.target.value)}
+                >
+                  {last24Months.map((m) => (
+                    <option key={m} value={m}>
+                      {m}
+                    </option>
+                  ))}
+                </SelectInput>
+                <span style={{ color: '#888' }}>até</span>
+                <SelectInput
+                  value={customTo}
+                  onChange={(e) => setCustomTo(e.target.value)}
+                >
+                  {last24Months.map((m) => (
+                    <option key={m} value={m}>
+                      {m}
+                    </option>
+                  ))}
+                </SelectInput>
+              </div>
+            )}
+
+            <ActionButton onClick={downloadCsv} width="100%">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Baixar CSV{' '}
+              {exportMode === 'custom'
+                ? '(Período)'
+                : exportMode === 'previous'
+                ? '(Mês Anterior)'
+                : '(Mês Atual)'}
+            </ActionButton>
+          </SettingsPanel>
         </div>
       )}
 
-      <main style={styles.mainContent}>
-        <p style={styles.transcript}>{transcript}</p>
-        <p style={styles.statusText}>{status}</p>
+      <MainContent pushDown={showSettings}>
+        <p
+          className={css({
+            fontSize: '1.8rem',
+            fontWeight: '500',
+            minHeight: '2.5em',
+            color: '#fff',
+            padding: '0 1rem',
+          })}
+        >
+          {transcript}
+        </p>
+        <p
+          className={css({
+            marginTop: '2rem',
+            fontSize: '1.4rem',
+            minHeight: '2em',
+            color: '#ffffff',
+            fontWeight: 'bold',
+          })}
+        >
+          {status}
+        </p>
 
         {!awaitingConfirmation ? (
-          <button
+          <MicButton
             onClick={handleMicButtonClick}
             disabled={!recognitionRef.current || isRecording}
-            style={styles.micButton}
-            aria-label={isRecording ? 'Parar gravação' : 'Iniciar gravação'}
+            recording={isRecording}
           >
             <MicIcon recording={isRecording} />
-          </button>
+          </MicButton>
         ) : (
-          <div style={styles.confirmationButtons}>
-            <button onClick={sendGastoToApi} style={{ ...styles.button, ...styles.confirmButton }}>
+          <div
+            className={css({
+              marginTop: '1.5rem',
+              display: 'flex',
+              gap: '1rem',
+            })}
+          >
+            <ActionButton onClick={sendGastoToApi} variant="success">
               Confirmar
-            </button>
-            <button onClick={handleCancel} style={{ ...styles.button, ...styles.cancelButton }}>
+            </ActionButton>
+            <ActionButton onClick={handleCancel} variant="secondary">
               Tentar Novamente
-            </button>
+            </ActionButton>
           </div>
         )}
-      </main>
+      </MainContent>
 
       <footer style={{ height: '50px' }}></footer>
-    </div>
+    </Container>
   );
 }
