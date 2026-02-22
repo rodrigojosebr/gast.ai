@@ -69,6 +69,7 @@ export default function VoiceGastoPage() {
   const [isPasswordPreFilled, setIsPasswordPreFilled] = useState(false);
   const recognitionRef = useRef<any>(null);
   const statusTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const loadingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const settingsPanelRef = useRef<HTMLDivElement>(null);
   const settingsButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -156,9 +157,8 @@ export default function VoiceGastoPage() {
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
-      if (statusTimeoutRef.current) {
-        clearTimeout(statusTimeoutRef.current);
-      }
+      if (statusTimeoutRef.current) clearTimeout(statusTimeoutRef.current);
+      if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current);
     };
   }, []);
 
@@ -178,34 +178,60 @@ export default function VoiceGastoPage() {
 
   const sendGastoToApi = async () => {
     if (!transcript) return;
-    setStatus('Enviando...');
+    
+    const loadingPhrases = [
+      "👛 Abrindo a carteira...",
+      "📝 Anotando no caderninho...",
+      "🧮 Fazendo as contas...",
+      "🧐 Analisando a compra...",
+      "☁️ Guardando na nuvem..."
+    ];
+    setStatus(loadingPhrases[0]);
     setAwaitingConfirmation(false);
 
     if (statusTimeoutRef.current) clearTimeout(statusTimeoutRef.current);
+    if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current);
+
+    const displayPhrasesPromise = new Promise((resolve) => {
+      let phraseIndex = 0;
+      loadingIntervalRef.current = setInterval(() => {
+        phraseIndex++;
+        if (phraseIndex < loadingPhrases.length) {
+          setStatus(loadingPhrases[phraseIndex]);
+        } else {
+          if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current);
+          resolve(true);
+        }
+      }, 1000); // 1 segundo por frase
+    });
 
     try {
-      const response = await fetch('/api/gasto', {
+      const fetchPromise = fetch('/api/gasto', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey },
         body: JSON.stringify({ text: transcript }),
-      });
+      }).catch(err => { throw err; });
+
+      // Espera tanto a animação terminar (mínimo de 5 segundos) quanto o servidor responder
+      const [_, response] = await Promise.all([displayPhrasesPromise, fetchPromise]);
 
       const data = await response.json();
       if (response.ok) {
-        setStatus(`Salvo: ${data.event?.amountBRL} em ${data.event?.description}`);
+        setStatus(`✅ Salvo: ${data.event?.amountBRL} em ${data.event?.description}`);
         statusTimeoutRef.current = setTimeout(() => {
           setStatus(getRandomFunnyPhrase());
         }, 2000);
       } else {
-        setStatus(`Erro: ${data.error || response.statusText}`);
+        setStatus(`❌ Erro: ${data.error || response.statusText}`);
       }
     } catch (error: any) {
-      setStatus(`Erro de rede: ${error.message}`);
+      if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current);
+      setStatus(`⚠️ Erro de rede: ${error.message}`);
     } finally {
       setTranscript('');
       statusTimeoutRef.current = setTimeout(() => {
         setStatus('Clique no microfone para começar');
-      }, 6000);
+      }, 12000);
     }
   };
 
@@ -559,8 +585,8 @@ export default function VoiceGastoPage() {
               {exportMode === 'custom'
                 ? '(Período)'
                 : exportMode === 'previous'
-                ? '(Mês Anterior)'
-                : '(Mês Atual)'}
+                  ? '(Mês Anterior)'
+                  : '(Mês Atual)'}
             </ActionButton>
           </SettingsPanel>
         </div>
@@ -579,12 +605,14 @@ export default function VoiceGastoPage() {
           {transcript}
         </p>
         <p
+          key={status} // O React recria o elemento quando a key muda, disparando a animação
           className={css({
-            marginTop: '2rem',
+            marginTop: '3rem',
             fontSize: '1.4rem',
             minHeight: '2em',
             color: '#ffffff',
             fontWeight: 'bold',
+            animation: 'fadeIn 0.5s ease-out',
           })}
         >
           {status}
