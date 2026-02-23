@@ -356,16 +356,21 @@ export default function VoiceGastoPage() {
       <MoneyRain count={50} />
 
       <Header>
-        <div>
-          <h1
-            className={css({
-              fontSize: '1.2rem',
-              color: '#888',
-              margin: '0 0 0.5rem 0',
-            })}
-          >
-            Registro de gastos
-          </h1>
+        <div className={css({ display: 'flex', flexDirection: 'column', gap: '0.2rem' })}>
+          <div className={css({ display: 'flex', alignItems: 'center', gap: '0.6rem' })}>
+            <img src="/logo.svg" alt="Gast.ai Logo" className={css({ width: '32px', height: '32px' })} />
+            <h1
+              className={css({
+                fontSize: '1.6rem',
+                color: '#fff',
+                fontWeight: '900',
+                margin: 0,
+                letterSpacing: '-0.05em'
+              })}
+            >
+              Gast.ai
+            </h1>
+          </div>
           {userName && (
             <p
               className={css({
