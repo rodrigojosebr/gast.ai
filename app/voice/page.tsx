@@ -280,7 +280,15 @@ export default function VoiceGastoPage() {
         if (response.ok && data.user?.name) {
           setUserName(data.user.name);
           localStorage.setItem('gastos_user_name', data.user.name);
-          setStatus(`Bem-vindo, ${data.user.name}!`);
+          setStatus(`✅ Bem-vindo(a), ${data.user.name}!`);
+          
+          // Fecha o painel imediatamente após o sucesso
+          setShowSettings(false);
+
+          // Restaura a mensagem principal após um breve momento
+          setTimeout(() => {
+            setStatus('Clique no microfone para começar');
+          }, 2500);
         } else {
           setStatus('Senha inválida. Por favor, tente novamente.');
           setUserName('');
@@ -356,16 +364,21 @@ export default function VoiceGastoPage() {
       <MoneyRain count={50} />
 
       <Header>
-        <div>
-          <h1
-            className={css({
-              fontSize: '1.2rem',
-              color: '#888',
-              margin: '0 0 0.5rem 0',
-            })}
-          >
-            Registro de gastos
-          </h1>
+        <div className={css({ display: 'flex', flexDirection: 'column', gap: '0.2rem' })}>
+          <div className={css({ display: 'flex', alignItems: 'center', gap: '0.6rem' })}>
+            <img src="/logo.svg" alt="Gast.ai Logo" className={css({ width: '32px', height: '32px' })} />
+            <h1
+              className={css({
+                fontSize: '1.6rem',
+                color: '#fff',
+                fontWeight: '900',
+                margin: 0,
+                letterSpacing: '-0.05em'
+              })}
+            >
+              Gast.ai
+            </h1>
+          </div>
           {userName && (
             <p
               className={css({
@@ -395,7 +408,7 @@ export default function VoiceGastoPage() {
       </Header>
 
       {showSettings && (
-        <div ref={settingsPanelRef}>
+        <div ref={settingsPanelRef} className={css({ animation: 'slideDown 0.3s ease-out' })}>
           <SettingsPanel>
             <div
               style={{
