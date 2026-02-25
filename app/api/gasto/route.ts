@@ -14,6 +14,7 @@ const oldToNewUsers: Record<string, string> = {
 export async function POST(req: Request) {
   try {
     const apiKey = req.headers.get("x-api-key");
+    const timeZone = req.headers.get("x-timezone") || 'America/Sao_Paulo';
     const oldUser = getUserFromApiKey(apiKey);
     if (!oldUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -26,7 +27,7 @@ export async function POST(req: Request) {
     if (!text) return NextResponse.json({ error: "Missing text" }, { status: 400 });
 
     // Chama o Google Gemini (IA)
-    const parsedExpense = await parseExpenseText(text);
+    const parsedExpense = await parseExpenseText(text, timeZone);
     if (!parsedExpense || parsedExpense.amountCents == null) {
       return NextResponse.json({ error: "Não consegui extrair as informações do seu gasto (valor, descrição). Tente falar de forma mais clara." }, { status: 400 });
     }
