@@ -19,7 +19,7 @@ export async function parseExpenseText(text: string, timeZone: string = 'America
 
     Instruções de Formatação:
     1. Corrija erros comuns de STT pelo contexto (ex: "pic" -> Pix, "shopp" -> Shopee, "chain" -> Shein). Mantenha "shopping" se for o local.
-    2. Descrição: Deve ser a instrução recebida porém bem escrita. Deve ser amigável e informativa, mantendo características completas que ajudem a identificar o item como local da compra, motivo, destino característica (ex: "Pincel Macio em São Paulo", "Hambúrguer Artesanal delicioso na Hamburgueria do João", "Blusinha linda para Ana Clara na C&A do Shopping Maia"). Evite apenas uma palavra genérica se houver detalhes relevantes.
+    2. Descrição: Deve ser amigável e informativa, mantendo características que ajudem a identificar o item como local da compra, motivo, destino característica (ex: "Pincel Macio em São Paulo", "Hambúrguer Artesanal delicioso na Hamburgueria do João", "Blusinha linda para Ana Clara na C&A do Shopping Maia"). Evite apenas uma palavra genérica se houver detalhes relevantes.
 
     Retorne APENAS um JSON estrito:
     {
