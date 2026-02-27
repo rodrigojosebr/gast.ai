@@ -59,17 +59,17 @@ O objetivo é separar a camada de acesso a dados e adicionar validação estrita
     - Atualizar `POST /api/gasto` para validar payload via Zod e salvar via `ExpenseRepository`.
     - Atualizar `GET /api/export.csv` para usar o repositório.
 
-## 🔐 6. Autenticação Multi-usuário (NextAuth.js)
+## 🔐 6. Autenticação Multi-usuário (NextAuth.js) - *Concluído*
 O objetivo é criar um sistema real de sessão e login.
 
-- [ ] **6.1 Interfaces de Cadastro e Login**
+- [x] **6.1 Interfaces de Cadastro e Login**
     - Criar páginas `/register` e `/login` seguindo o design system do PandaCSS.
     - Criar endpoint `POST /api/auth/register` (usando `bcryptjs` e `UserRepository`).
-- [ ] **6.2 Integração NextAuth**
+- [x] **6.2 Integração NextAuth**
     - Configurar `app/api/auth/[...nextauth]/route.ts` com `CredentialsProvider`.
     - Validar login contra o PostgreSQL.
-- [ ] **6.3 Proteção de Rotas**
-    - Implementar Next.js Middleware para redirecionar usuários não autenticados de `/voice` para `/login`.
+- [x] **6.3 Proteção de Rotas**
+    - Proteger rotas client-side (`/voice`) redirecionando não autenticados para `/login`.
     - Atualizar APIs para extraírem o `userId` exclusivamente da sessão segura.
 
 ## 📊 7. Dashboard e Gestão de Gastos (CRUD)

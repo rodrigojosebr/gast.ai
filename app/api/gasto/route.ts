@@ -1,27 +1,23 @@
 import { NextResponse } from "next/server";
-import { getUserFromApiKey, centsToBRL } from "@/lib/gastos";
+import { centsToBRL } from "@/lib/gastos";
 import { parseExpenseText } from "@/services/aiParserService";
 import { ExpenseRepository } from "@/repositories/expenseRepository";
 import { createExpenseSchema } from "@/schemas/expenseSchema";
-
-// Mapa temporário: liga o sistema antigo (Vercel KV) aos IDs reais do novo Neon (Postgres)
-// Isso nos permite testar a IA -> Postgres sem quebrar o front-end atual!
-const oldToNewUsers: Record<string, string> = {
-  "user_1a2b3c": "e73e369d-6f36-405c-b14c-a0de1e1dfe24", // raj
-  "user_4d5e6f": "dd50741b-a835-4c3f-80d2-f27d7f742864"  // roseane
-};
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
-    const apiKey = req.headers.get("x-api-key");
+    const session = await getServerSession(authOptions);
+    
+    if (!session || !session.user || !(session.user as any).id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = (session.user as any).id as string;
+    const userName = session.user.name || "Usuário";
+
     const timeZone = req.headers.get("x-timezone") || 'America/Sao_Paulo';
-    const oldUser = getUserFromApiKey(apiKey);
-    if (!oldUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    // Busca o novo UUID do banco relacional
-    const newUserId = oldToNewUsers[oldUser.id];
-    if (!newUserId) return NextResponse.json({ error: "Usuário não migrado para o banco novo" }, { status: 500 });
-
     const body = await req.json().catch(() => ({}));
     const text = String(body.text ?? body.valor ?? "").trim();
     if (!text) return NextResponse.json({ error: "Missing text" }, { status: 400 });
@@ -36,7 +32,7 @@ export async function POST(req: Request) {
     const expenseData = {
       ...parsedExpense,
       rawText: text,
-      userId: newUserId
+      userId: userId
     };
 
     // 2. Validação Estrita (Zod)
@@ -50,7 +46,7 @@ export async function POST(req: Request) {
     const savedExpense = await ExpenseRepository.create(validationResult.data);
 
     // 4. Cálculo do Total Mensal (Buscando direto do Postgres)
-    const allUserExpenses = await ExpenseRepository.findByUserId(newUserId);
+    const allUserExpenses = await ExpenseRepository.findByUserId(userId);
 
     // Pega o YYYY-MM do mês atual (UTC)
     const currentMonth = new Date().toISOString().slice(0, 7);
@@ -63,7 +59,7 @@ export async function POST(req: Request) {
     // 5. Devolve para o front-end (adaptando para a interface que ele já espera)
     const event = {
       id: savedExpense.id,
-      user: { id: oldUser.id, name: oldUser.name },
+      user: { id: userId, name: userName },
       date: savedExpense.date.toISOString().split('T')[0].split('-').reverse().join('/'),
       amountCents: savedExpense.amountCents,
       amountBRL: centsToBRL(savedExpense.amountCents),
