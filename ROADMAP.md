@@ -27,35 +27,35 @@ Para manter a organização, utilizaremos o seguinte fluxo:
 
 ---
 
-## 🏗️ 4. Infraestrutura e Banco de Dados (Neon PostgreSQL)
+## 🏗️ 4. Infraestrutura e Banco de Dados (Neon PostgreSQL) - *Em andamento (branch: feature/postgres-prisma)*
 O objetivo é abandonar o Vercel KV em favor de um banco relacional robusto e serverless usando Neon.
 
 - [ ] **4.1 Criação do Banco Neon**
     - Criar conta no Neon (neon.tech) e provisionar um novo projeto PostgreSQL (Free Tier).
     - Obter a `DATABASE_URL` (Connection String) e adicionar ao `.env.local`.
-- [ ] **4.2 Configuração do Prisma ORM**
+- [x] **4.2 Configuração do Prisma ORM**
     - Executar `npm install prisma --save-dev` e `npm install @prisma/client`.
     - Executar `npx prisma init` para gerar a pasta `prisma/` e o `.env`.
     - Configurar o `schema.prisma` para usar o provider `postgresql` e a `env("DATABASE_URL")`.
-- [ ] **4.3 Modelagem de Dados (`schema.prisma`)**
+- [x] **4.3 Modelagem de Dados (`schema.prisma`)**
     - Criar o modelo `User` (`id` UUID, `name` String, `email` String UNIQUE, `passwordHash` String, `createdAt` DateTime).
     - Criar o modelo `Expense` (`id` UUID, `amountCents` Int, `description` String, `paymentMethod` String, `date` DateTime, `rawText` String, `userId` UUID).
     - Estabelecer relacionamento 1:N entre `User` e `Expense`.
-- [ ] **4.4 Sincronização e Geração do Client**
+- [x] **4.4 Sincronização e Geração do Client**
     - Executar `npx prisma db push` para criar as tabelas no Neon.
     - Executar `npx prisma generate` para criar o cliente TypeScript tipado.
     - Opcional: Popular dados de teste via `npx prisma studio`.
 
-## 🏛️ 5. Arquitetura Limpa (Repositories e Schemas)
+## 🏛️ 5. Arquitetura Limpa (Repositories e Schemas) - *Concluído*
 O objetivo é separar a camada de acesso a dados e adicionar validação estrita.
 
-- [ ] **5.1 Padrão Repository**
+- [x] **5.1 Padrão Repository**
     - Criar `repositories/userRepository.ts` (operações Prisma para User).
     - Criar `repositories/expenseRepository.ts` (operações Prisma para Expense).
-- [ ] **5.2 Validação Estrita com Zod**
+- [x] **5.2 Validação Estrita com Zod**
     - Instalar `zod`.
     - Criar `schemas/expenseSchema.ts` e `schemas/authSchema.ts`.
-- [ ] **5.3 Refatoração da API Core**
+- [x] **5.3 Refatoração da API Core**
     - Atualizar `POST /api/gasto` para validar payload via Zod e salvar via `ExpenseRepository`.
     - Atualizar `GET /api/export.csv` para usar o repositório.
 
@@ -103,6 +103,14 @@ O objetivo é substituir a lógica frágil de Regex por um LLM capaz de interpre
 - [x] **8.5 Feedback Financeiro Imediato**
     - Cálculo dinâmico e exibição do total gasto no mês atual logo após o registro da despesa.
     - Formatação monetária padronizada (pt-BR) e mensagens de sucesso personalizadas com o nome do usuário.
+- [x] **8.6 Análise Financeira Avançada (Gastão Persona)**
+    - Implementado `GET /api/analyze` usando o modelo `gemini-2.5-flash-lite` com *streaming de texto* em tempo real.
+    - Criação da persona **"Gastão"**, mascote sarcástico e amigável, com regras rígidas no prompt para evitar markdown e focar em conselhos construtivos e diretos.
+    - Modal na UI projetado para simular o efeito "máquina de escrever" do ChatGPT e lidar com overflow na tela de forma otimizada.
+    - Controle refinado de **Temperatura da IA** (`0.1` para cálculos e extrações assertivas e `0.3` para respostas orgânicas do Gastão).
+- [x] **8.7 Correção de Fuso Horário Local**
+    - Identificação e captura do fuso horário dinâmico do cliente (`Intl.DateTimeFormat().resolvedOptions().timeZone`) no frontend.
+    - Envio do cabeçalho `x-timezone` para o backend para corrigir discrepâncias de data (UTC x América Latina) tanto na extração via Gemini quanto na exibição nativa.
 
 ## 📱 9. Progressive Web App (PWA) e Mobile-First
 O objetivo é tornar o app instalável na tela inicial do celular (parecendo um app nativo) e preparar o terreno para publicação nas App Stores.

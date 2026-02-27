@@ -1,0 +1,31 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  expenses Expense[]
+}
+
+model Expense {
+  id            String   @id @default(uuid())
+  amountCents   Int
+  description   String
+  paymentMethod String
+  date          DateTime
+  rawText       String? // Tornando opcional, pois podemos não ter sempre o texto original
+  userId        String
+
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
