@@ -1,14 +1,15 @@
 import { css } from '../../styled-system/css';
 
 interface ActionButtonProps {
-  onClick: () => void;
+  onClick?: () => void;
   variant?: 'success' | 'secondary' | 'default';
   children: React.ReactNode;
   width?: string;
   disabled?: boolean;
+  type?: 'button' | 'submit' | 'reset';
 }
 
-export const ActionButton = ({ onClick, variant = 'default', children, width, disabled }: ActionButtonProps) => {
+export const ActionButton = ({ onClick, variant = 'default', children, width, disabled, type = 'button' }: ActionButtonProps) => {
   const bgColors = {
     success: '#4CAF50',
     secondary: '#6c757d',
@@ -19,6 +20,7 @@ export const ActionButton = ({ onClick, variant = 'default', children, width, di
     <button
       onClick={onClick}
       disabled={disabled}
+      type={type}
       style={{ 
         backgroundColor: disabled ? '#555' : bgColors[variant], 
         width: width,

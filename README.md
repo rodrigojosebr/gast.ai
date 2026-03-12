@@ -47,7 +47,8 @@ cp .env.example .env.local
 Dentro de `.env.local`, você precisará configurar:
 1.  **Chave da IA:** Insira sua `GEMINI_API_KEY` gerada no Google AI Studio.
 2.  **Chave do Banco de Dados:** Adicione o `KV_REST_API_URL` e `KV_REST_API_TOKEN` gerados pelo seu banco KV na Vercel.
-3.  **Usuários de Teste:** O sistema de login provisório é baseado em um JSON mapeado. Mude o ID e Nome se desejar.
+3.  **Variáveis de Ambiente Adicionais:** Defina o `NEXTAUTH_SECRET` (pode ser qualquer string aleatória para criptografar as sessões) e o `NEXTAUTH_URL` (ex: `http://localhost:3000`).
+4.  **Usuários de Teste:** O sistema agora possui um fluxo completo de Cadastro e Login. Para testes rápidos, você pode popular o banco com usuários padrão rodando `npx prisma db seed`.
 
 ### 4. Rodando a Aplicação
 Execute o servidor de desenvolvimento:

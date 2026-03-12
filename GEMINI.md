@@ -12,7 +12,7 @@ This document provides a comprehensive overview of the `Gast.ai` project. It ser
 *   **Language:** TypeScript
 *   **Database:** Neon (Serverless PostgreSQL)
 *   **ORM:** Prisma (v7+) with `@prisma/adapter-pg` and `pg` pool.
-*   **Authentication:** NextAuth.js (Auth.js) with Credentials & bcryptjs *(Pending implementation - currently using legacy API Key mapping)*
+*   **Authentication:** NextAuth.js (Auth.js) with Credentials & bcryptjs
 *   **Validation:** Zod
 *   **Styling:** PandaCSS (zero-runtime, type-safe CSS-in-JS)
 *   **AI Engine:** Google Gemini SDK (Natural language parsing of expenses)
@@ -42,7 +42,7 @@ The project strictly follows a layered architecture to separate business logic f
     *   **NEVER** use direct ORM calls (`prisma.expense...`) inside Next.js API Routes (`app/api/.../route.ts`).
     *   **ALWAYS** use the Repository Pattern (e.g., `ExpenseRepository.create(...)`).
 *   **Validation:** All incoming API payloads must be validated against a Zod schema before processing.
-*   **Authentication (Bridged State):** Currently, the system uses a bridge (`oldToNewUsers` mapper in API routes) to translate legacy `x-api-key` headers into the new PostgreSQL UUIDs. This allows testing the new DB without breaking the existing client. Full NextAuth integration is the next milestone.
+*   **Authentication:** The system uses NextAuth.js for session management with a custom Credentials provider and bcryptjs for secure password hashing. APIs are protected using `getServerSession`.
 *   **Error Handling:** API endpoints must return structured JSON errors (`{ error: string }`) with appropriate HTTP status codes (400 for validation, 401 for auth, 500 for server errors).
 *   **Code Style:** Strict TypeScript. No `any`. Variables must be camelCase, components PascalCase.
 

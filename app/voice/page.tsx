@@ -8,6 +8,8 @@ declare global {
 }
 
 import { useState, useRef, useEffect } from 'react';
+import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { css } from '../../styled-system/css';
 
 // Layout
@@ -18,10 +20,9 @@ import { MainContent } from '../../components/layout/MainContent';
 // UI
 import { MicIcon } from '../../components/ui/MicIcon';
 import { SettingsIcon } from '../../components/ui/SettingsIcon';
-import { EyeIcon, EyeOffIcon } from '../../components/ui/EyeIcons';
 import { ActionButton } from '../../components/ui/ActionButton';
-import { TextInput } from '../../components/ui/TextInput';
 import { SelectInput } from '../../components/ui/SelectInput';
+import { LogOutIcon } from '../../components/ui/LogOutIcon';
 
 // Features
 import { MoneyRain } from '../../components/features/MoneyRain';
@@ -63,18 +64,18 @@ const getRandomFunnyPhrase = (name: string) => {
 };
 
 export default function VoiceGastoPage() {
+  const { data: session, status: sessionStatus } = useSession();
+  const router = useRouter();
+
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [status, setStatus] = useState('Clique no microfone para começar');
-  const [apiKey, setApiKey] = useState('');
-  const [userName, setUserName] = useState('');
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isPasswordPreFilled, setIsPasswordPreFilled] = useState(false);
   const [analyzeBeforeExport, setAnalyzeBeforeExport] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
+  
   const recognitionRef = useRef<any>(null);
   const statusTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const loadingIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -82,20 +83,14 @@ export default function VoiceGastoPage() {
   const settingsPanelRef = useRef<HTMLDivElement>(null);
   const settingsButtonRef = useRef<HTMLButtonElement>(null);
 
-  // Load API key and user name
+  const userName = session?.user?.name || '';
+
+  // Protected route
   useEffect(() => {
-    const storedApiKey = localStorage.getItem('gastos_api_key');
-    const storedUserName = localStorage.getItem('gastos_user_name');
-    if (storedApiKey) {
-      setApiKey(storedApiKey);
-      setIsPasswordPreFilled(true);
-      if (storedUserName) setUserName(storedUserName);
-      setShowSettings(false);
-    } else {
-      setShowSettings(true);
-      setStatus('Bem-vindo! Por favor, configure sua senha.');
+    if (sessionStatus === "unauthenticated") {
+      router.push("/login");
     }
-  }, []);
+  }, [sessionStatus, router]);
 
   // Close settings when clicking outside
   useEffect(() => {
@@ -184,9 +179,8 @@ export default function VoiceGastoPage() {
   }, []);
 
   const handleMicButtonClick = () => {
-    if (!apiKey) {
-      setStatus('Configure sua senha nas configurações.');
-      setShowSettings(true);
+    if (sessionStatus !== "authenticated") {
+      setStatus('Faça login primeiro.');
       return;
     }
     if (isRecording && recognitionRef.current) {
@@ -234,7 +228,7 @@ export default function VoiceGastoPage() {
       const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Sao_Paulo';
       const fetchPromise = fetch('/api/gasto', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'x-timezone': timeZone },
+        headers: { 'Content-Type': 'application/json', 'x-timezone': timeZone },
         body: JSON.stringify({ text: transcript }),
       }).catch(err => { throw err; });
 
@@ -268,44 +262,6 @@ export default function VoiceGastoPage() {
     setAwaitingConfirmation(false);
   }
 
-  const handleApiKeyChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newKey = e.target.value;
-    setApiKey(newKey);
-    localStorage.setItem('gastos_api_key', newKey);
-
-    setUserName('');
-    localStorage.removeItem('gastos_user_name');
-
-    if (newKey) {
-      setStatus('Verificando senha...');
-      try {
-        const response = await fetch('/api/user', { headers: { 'x-api-key': newKey } });
-        const data = await response.json();
-        if (response.ok && data.user?.name) {
-          setUserName(data.user.name);
-          localStorage.setItem('gastos_user_name', data.user.name);
-          setStatus(`✅ Bem-vindo(a), ${data.user.name}!`);
-
-          // Fecha o painel imediatamente após o sucesso
-          setShowSettings(false);
-
-          // Restaura a mensagem principal após um breve momento
-          setTimeout(() => {
-            setStatus('Clique no microfone para começar');
-          }, 2500);
-        } else {
-          setStatus('Senha inválida. Por favor, tente novamente.');
-          setUserName('');
-        }
-      } catch (error) {
-        setStatus('Erro ao verificar senha.');
-        setUserName('');
-      }
-    } else {
-      setStatus('Por favor, insira sua senha.');
-    }
-  };
-
   const [exportMode, setExportMode] = useState<'current' | 'previous' | 'custom'>('current');
   const [customFrom, setCustomFrom] = useState('');
   const [customTo, setCustomTo] = useState('');
@@ -328,7 +284,7 @@ export default function VoiceGastoPage() {
   }, []);
 
   const executeDownload = (from: string, to: string) => {
-    const url = `/api/export.csv?key=${apiKey}&from=${from}&to=${to}`;
+    const url = `/api/export.csv?from=${from}&to=${to}`;
     const link = document.createElement('a');
     link.href = url;
     link.download = `gastos-${from}-ate-${to}.csv`;
@@ -338,7 +294,7 @@ export default function VoiceGastoPage() {
   };
 
   const handleExportAction = async () => {
-    if (!apiKey) return;
+    if (sessionStatus !== "authenticated") return;
 
     let from = '';
     let to = '';
@@ -387,7 +343,7 @@ export default function VoiceGastoPage() {
         }
       }, 2000);
       try {
-        const response = await fetch(`/api/analyze?key=${apiKey}&from=${from}&to=${to}`);
+        const response = await fetch(`/api/analyze?from=${from}&to=${to}`);
 
         if (!response.ok) {
           clearInterval(phraseInterval);
@@ -476,6 +432,16 @@ export default function VoiceGastoPage() {
     });
   };
 
+  if (sessionStatus === "loading" || sessionStatus === "unauthenticated") {
+    return (
+      <Container>
+        <div className={css({ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '1.2rem' })}>
+          Carregando...
+        </div>
+      </Container>
+    );
+  }
+
   return (
     <Container>
       <MoneyRain count={50} />
@@ -562,53 +528,6 @@ export default function VoiceGastoPage() {
                 </svg>
               </button>
             </div>
-
-            <label
-              htmlFor="apiKey"
-              style={{
-                display: 'block',
-                marginBottom: '0.5rem',
-                fontWeight: 'bold',
-              }}
-            >
-              Senha:
-            </label>
-            <div className={css({ position: 'relative', width: '100%' })}>
-              <TextInput
-                type={isPasswordVisible ? 'text' : 'password'}
-                id="apiKey"
-                value={isPasswordPreFilled ? '' : apiKey}
-                onChange={(e) => {
-                  setIsPasswordPreFilled(false);
-                  handleApiKeyChange(e);
-                }}
-                placeholder={
-                  isPasswordPreFilled
-                    ? 'Senha já configurada. Digite para alterar.'
-                    : 'Sua senha secreta'
-                }
-              />
-              <button
-                onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-                className={css({
-                  position: 'absolute',
-                  right: '10px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'none',
-                  border: 'none',
-                  color: '#888',
-                  cursor: 'pointer',
-                })}
-                aria-label={isPasswordVisible ? 'Esconder senha' : 'Mostrar senha'}
-              >
-                {isPasswordVisible ? <EyeOffIcon /> : <EyeIcon />}
-              </button>
-            </div>
-
-            <hr
-              style={{ borderColor: '#444', margin: '1.5rem 0 1rem 0' }}
-            />
 
             <label
               style={{
@@ -746,7 +665,9 @@ export default function VoiceGastoPage() {
                     <path d="M5 18H3"></path>
                   </svg>
                 </div>
-              </label>                                                </div>            <ActionButton onClick={handleExportAction} width="100%" disabled={isAnalyzing}>
+              </label>                                                </div>            
+              
+              <ActionButton onClick={handleExportAction} width="100%" disabled={isAnalyzing}>
               {isAnalyzing ? (
                 <>
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={css({ animation: 'spin 2s linear infinite' })}><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>
@@ -778,6 +699,35 @@ export default function VoiceGastoPage() {
                 </>
               )}
             </ActionButton>
+
+            <hr style={{ borderColor: '#444', margin: '1.5rem 0' }} />
+
+            <button
+              onClick={() => signOut({ callbackUrl: '/login' })}
+              className={css({
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.8rem',
+                width: '100%',
+                padding: '0.8rem',
+                backgroundColor: 'transparent',
+                border: '1px solid #444',
+                borderRadius: '8px',
+                color: '#ff4d4f',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                fontWeight: '600',
+                transition: 'all 0.2s',
+                justifyContent: 'center',
+                _hover: {
+                  backgroundColor: 'rgba(255, 77, 79, 0.1)',
+                  borderColor: '#ff4d4f',
+                }
+              })}
+            >
+              <LogOutIcon />
+              Sair da conta
+            </button>
           </SettingsPanel>
         </div>
       )}

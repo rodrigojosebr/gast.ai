@@ -1,12 +1,8 @@
 import { NextResponse } from "next/server";
-import { getUserFromApiKey, centsToBRL } from "@/lib/gastos";
+import { centsToBRL } from "@/lib/gastos";
 import { ExpenseRepository } from "@/repositories/expenseRepository";
-
-// Mapper temporário do sistema antigo pro novo Postgres
-const oldToNewUsers: Record<string, string> = {
-  "user_1a2b3c": "e73e369d-6f36-405c-b14c-a0de1e1dfe24", // raj
-  "user_4d5e6f": "dd50741b-a835-4c3f-80d2-f27d7f742864"  // roseane
-};
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 
 function csvEscape(v: string): string {
   if (/[;\n"]/.test(v)) return `"${v.replace(/"/g, '""')}"`;
@@ -15,15 +11,14 @@ function csvEscape(v: string): string {
 
 export async function GET(req: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session || !session.user || !(session.user as any).id) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    const userId = (session.user as any).id as string;
     const url = new URL(req.url);
-
-    // Excel/PowerQuery não manda header fácil; então aceitamos ?key=... também
-    const apiKey = req.headers.get("x-api-key") ?? url.searchParams.get("key");
-    const oldUser = getUserFromApiKey(apiKey);
-    if (!oldUser) return new NextResponse("Unauthorized", { status: 401 });
-
-    const newUserId = oldToNewUsers[oldUser.id];
-    if (!newUserId) return new NextResponse("Usuário não migrado", { status: 500 });
 
     const month = url.searchParams.get("month"); // Legacy support
     const from = url.searchParams.get("from") || month;
@@ -34,7 +29,7 @@ export async function GET(req: Request) {
     }
 
     // Puxa tudo e filtra na memória para o MVP (no futuro podemos usar where: { date: { gte, lte } })
-    const allUserExpenses = await ExpenseRepository.findByUserId(newUserId);
+    const allUserExpenses = await ExpenseRepository.findByUserId(userId);
 
     // Cálculo dos limites do período (UTC)
     const [startYear, startMonthVal] = from.split("-").map(Number);
