@@ -12,6 +12,7 @@ Atualmente em fase de MVP (usando Vercel KV) e em transição ativa para uma arq
 *   **🤖 Extração com IA (Google Gemini):** Alimentado pelo modelo `gemini-2.5-flash-lite`, o sistema extrai automaticamente o valor (em centavos e formatado em R$), a descrição exata, a data (suportando fuso horário local) e o método de pagamento (Crédito, Débito, Pix, Dinheiro), corrigindo falhas de STT no processo.
 *   **🤵‍♂️ Gastão - Seu Consultor Financeiro:** O mascote do app usa IA para analisar seus gastos de forma bem-humorada, irônica e inteligente, alertando sobre padrões de gastos diretamente na interface usando um efeito de digitação em tempo real (streaming).
 *   **💡 Feedback Financeiro Imediato:** Assim que o gasto é salvo, você recebe um "choque de realidade" animado informando o total que você já gastou naquele mês.
+*   **📱 Instalação Cross-Platform (PWA):** O aplicativo se comporta como um app nativo. Possui um botão de instalação inteligente que aciona o prompt nativo no Android ou um tutorial de instalação elegante no iOS (Safari).
 *   **🎨 UI/UX Moderna e Fluida:** Construído com Next.js (App Router) e estilizado usando **PandaCSS** (zero-runtime CSS-in-JS), com animações de carregamento (`fadeIn`, `slideDown`), modais de análise com rolagem otimizada e feedback visual claro para o usuário.
 *   **📊 Exportação de Dados:** Geração de relatórios mensais em `.csv` (Data; Valor; Descrição; Método de Pagamento) compatíveis com Excel.
 

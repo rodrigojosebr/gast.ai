@@ -112,6 +112,9 @@ O objetivo é tornar o app instalável na tela inicial do celular (parecendo um 
 
 - [x] **9.1 Configuração PWA no Next.js**
 - [x] **9.2 Service Workers e Ícones**
-- [ ] **9.3 Ajustes de UX para Mobile**
+- [x] **9.3 Instalação Cross-Platform (Prompt Inteligente)**
+    - Implementação do evento `beforeinstallprompt` para Android/Desktop.
+    - Modal de instrução personalizado para usuários de iOS (Safari).
+- [ ] **9.4 Ajustes de UX para Mobile**
     - Impedir o "pull-to-refresh" indesejado na tela de voz.
     - Garantir que a UI fique perfeita na "safe area" de iPhones (sem sobrepor a notch ou barra inferior).

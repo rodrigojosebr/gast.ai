@@ -16,7 +16,7 @@ This document provides a comprehensive overview of the `Gast.ai` project. It ser
 *   **Validation:** Zod
 *   **Styling:** PandaCSS (zero-runtime, type-safe CSS-in-JS)
 *   **AI Engine:** Google Gemini SDK (Natural language parsing of expenses)
-*   **Mobile / PWA:** next-pwa (Installable web app logic)
+*   **Mobile / PWA:** next-pwa (Installable web app logic with intelligent cross-platform install prompts for Android/iOS)
 
 ### Architecture (Clean Code & Separation of Concerns)
 
