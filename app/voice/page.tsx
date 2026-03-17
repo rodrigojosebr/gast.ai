@@ -20,6 +20,7 @@ import { MainContent } from '../../components/layout/MainContent';
 // UI
 import { MicIcon } from '../../components/ui/MicIcon';
 import { SettingsIcon } from '../../components/ui/SettingsIcon';
+import { ListIcon } from '../../components/ui/ListIcon';
 import { ActionButton } from '../../components/ui/ActionButton';
 import { SelectInput } from '../../components/ui/SelectInput';
 import { LogOutIcon } from '../../components/ui/LogOutIcon';
@@ -69,7 +70,7 @@ export default function VoiceGastoPage() {
 
   const [isRecording, setIsRecording] = useState(false);
   const [transcript, setTranscript] = useState('');
-  const [status, setStatus] = useState('Clique no microfone para começar');
+  const [status, setStatus] = useState('Conte para o Gastão a data do seu gasto, o valor, a descrição e a forma de pagamento');
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [analyzeBeforeExport, setAnalyzeBeforeExport] = useState(false);
@@ -251,14 +252,14 @@ export default function VoiceGastoPage() {
     } finally {
       setTranscript('');
       statusTimeoutRef.current = setTimeout(() => {
-        setStatus('Clique no microfone para começar');
+        setStatus('Conte para o Gastão a data do seu gasto, o valor, a descrição e a forma de pagamento');
       }, 12000);
     }
   };
 
   const handleCancel = () => {
     setTranscript('');
-    setStatus('Clique no microfone para começar');
+    setStatus('Conte para o Gastão a data do seu gasto, o valor, a descrição e a forma de pagamento');
     setAwaitingConfirmation(false);
   }
 
@@ -475,19 +476,35 @@ export default function VoiceGastoPage() {
             </p>
           )}
         </div>
-        <button
-          ref={settingsButtonRef}
-          onClick={() => setShowSettings(!showSettings)}
-          className={css({
-            background: 'none',
-            border: 'none',
-            color: '#888',
-            cursor: 'pointer',
-          })}
-          aria-label="Configurações"
-        >
-          <SettingsIcon />
-        </button>
+        <div className={css({ display: 'flex', gap: '0.5rem' })}>
+          <button
+            onClick={() => router.push("/dashboard")}
+            className={css({
+              background: 'none',
+              border: 'none',
+              color: '#888',
+              cursor: 'pointer',
+              padding: '5px',
+            })}
+            aria-label="Ver Dashboard"
+          >
+            <ListIcon />
+          </button>
+          <button
+            ref={settingsButtonRef}
+            onClick={() => setShowSettings(!showSettings)}
+            className={css({
+              background: 'none',
+              border: 'none',
+              color: '#888',
+              cursor: 'pointer',
+              padding: '5px',
+            })}
+            aria-label="Configurações"
+          >
+            <SettingsIcon />
+          </button>
+        </div>
       </Header>
 
       {showSettings && (

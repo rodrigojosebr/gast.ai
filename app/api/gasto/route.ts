@@ -6,6 +6,24 @@ import { createExpenseSchema } from "@/schemas/expenseSchema";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 
+export async function GET() {
+  try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session || !session.user || !(session.user as any).id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = (session.user as any).id as string;
+    const expenses = await ExpenseRepository.findByUserId(userId);
+
+    return NextResponse.json(expenses);
+  } catch (e: any) {
+    console.error("Erro no GET /api/gasto:", e);
+    return NextResponse.json({ error: "Erro ao buscar gastos" }, { status: 500 });
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);

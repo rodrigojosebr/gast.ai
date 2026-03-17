@@ -75,13 +75,8 @@ O objetivo é criar um sistema real de sessão e login.
 ## 📊 7. Dashboard e Gestão de Gastos (CRUD)
 O objetivo é permitir a visualização e exclusão de gastos (features inviáveis no KV).
 
-- [ ] **7.1 Endpoint de Listagem e Deleção**
-    - Criar `GET /api/gasto` (listar com filtros usando `ExpenseRepository`).
-    - Criar `DELETE /api/gasto/[id]` (deletar gasto próprio).
-- [ ] **7.2 Interface do Dashboard**
-    - Criar a página `/dashboard` ou `/gastos`.
-    - Implementar visualização em tabela ou lista moderna.
-    - Adicionar botão "Excluir" chamando a API de deleção com confirmação de segurança.
+- [x] **7.1 Endpoint de Listagem e Deleção**
+- [x] **7.2 Interface do Dashboard**
 
 ## 🤖 8. Inteligência Artificial (Gemini AI)
 O objetivo é substituir a lógica frágil de Regex por um LLM capaz de interpretar contexto, gírias e valores complexos falados pelo usuário.
@@ -115,12 +110,8 @@ O objetivo é substituir a lógica frágil de Regex por um LLM capaz de interpre
 ## 📱 9. Progressive Web App (PWA) e Mobile-First
 O objetivo é tornar o app instalável na tela inicial do celular (parecendo um app nativo) e preparar o terreno para publicação nas App Stores.
 
-- [ ] **9.1 Configuração PWA no Next.js**
-    - Instalar biblioteca (ex: `@ducanh2912/next-pwa` ou next-pwa).
-    - Criar o `manifest.json` com nome, cores e ícones do app.
-- [ ] **9.2 Service Workers e Ícones**
-    - Gerar os ícones (`maskable`, `apple-touch-icon`).
-    - Configurar o Service Worker para cache básico do shell da aplicação.
+- [x] **9.1 Configuração PWA no Next.js**
+- [x] **9.2 Service Workers e Ícones**
 - [ ] **9.3 Ajustes de UX para Mobile**
     - Impedir o "pull-to-refresh" indesejado na tela de voz.
     - Garantir que a UI fique perfeita na "safe area" de iPhones (sem sobrepor a notch ou barra inferior).
