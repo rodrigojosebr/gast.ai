@@ -29,6 +29,7 @@ import { LogOutIcon } from '../../components/ui/LogOutIcon';
 import { MoneyRain } from '../../components/features/MoneyRain';
 import { SettingsPanel } from '../../components/features/SettingsPanel';
 import { MicButton } from '../../components/features/MicButton';
+import { InstallPWA } from '../../components/features/InstallPWA';
 
 const funnySuccessPhrases = [
   "💸 Mais um pra conta, {name}! Dinheiro é pra circular mesmo (eu acho).",
@@ -476,7 +477,8 @@ export default function VoiceGastoPage() {
             </p>
           )}
         </div>
-        <div className={css({ display: 'flex', gap: '0.5rem' })}>
+        <div className={css({ display: 'flex', gap: '0.5rem', alignItems: 'center' })}>
+          <InstallPWA />
           <button
             onClick={() => router.push("/dashboard")}
             className={css({

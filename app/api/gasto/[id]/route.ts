@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/auth";
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -15,7 +15,7 @@ export async function DELETE(
     }
 
     const userId = (session.user as any).id as string;
-    const { id } = params;
+    const { id } = await params;
 
     const deleted = await ExpenseRepository.deleteUserExpense(id, userId);
 

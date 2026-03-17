@@ -9,6 +9,7 @@ import { Header } from "@/components/layout/Header";
 import { MainContent } from "@/components/layout/MainContent";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { MicIcon } from "@/components/ui/MicIcon";
+import { InstallPWA } from "@/components/features/InstallPWA";
 
 interface Expense {
   id: string;
@@ -99,28 +100,31 @@ export default function DashboardPage() {
           <img src="/logo.svg" alt="Gast.ai" className={css({ width: '40px', height: '40px' })} />
           <h1 className={css({ fontSize: '1.5rem', fontWeight: 'bold' })}>Meus Gastos</h1>
         </div>
-        <button
-          onClick={() => router.push("/voice")}
-          className={css({
-            background: '#333',
-            border: 'none',
-            color: 'white',
-            padding: '10px',
-            borderRadius: '50%',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'transform 0.2s',
-            '&:hover': { transform: 'scale(1.1)' }
-          })}
-          aria-label="Ir para Gravador de Voz"
-        >
-          <MicIcon />
-        </button>
+        <div className={css({ display: 'flex', alignItems: 'center', gap: '0.5rem' })}>
+          <InstallPWA />
+          <button
+            onClick={() => router.push("/voice")}
+            className={css({
+              background: '#333',
+              border: 'none',
+              color: 'white',
+              padding: '10px',
+              borderRadius: '50%',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'transform 0.2s',
+              '&:hover': { transform: 'scale(1.1)' }
+            })}
+            aria-label="Ir para Gravador de Voz"
+          >
+            <MicIcon recording={false} />
+          </button>
+        </div>
       </Header>
 
-      <MainContent>
+      <MainContent pushDown={false}>
         <div className={css({ 
           backgroundColor: '#222', 
           padding: '1.5rem', 
