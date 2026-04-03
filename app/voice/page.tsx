@@ -12,6 +12,12 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { css } from '../../styled-system/css';
 
+// Hooks
+import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
+
+// Utils
+import { getRandomFunnyPhrase } from '../../utils/phrases';
+
 // Layout
 import { Container } from '../../components/layout/Container';
 import { Header } from '../../components/layout/Header';
@@ -31,46 +37,19 @@ import { SettingsPanel } from '../../components/features/SettingsPanel';
 import { MicButton } from '../../components/features/MicButton';
 import { InstallPWA } from '../../components/features/InstallPWA';
 
-const funnySuccessPhrases = [
-  "💸 Mais um pra conta, {name}! Dinheiro é pra circular mesmo (eu acho).",
-  "🫡 Anotado, {name}! Deixa que o Serasa que lute com a gente.",
-  "🥷 Rapaz, {name}... esse não escapou do nosso radar!",
-  "✅ Missão cumprida! O Pix não falha, né {name}?",
-  "📜 Para a posteridade, {name}! (e pro desespero do final do mês).",
-  "🧙‍♂️ Magia feita, {name}! Gasto registrado com sucesso.",
-  "🐢 {name}, força na peruca porque até o próximo salário ainda falta...",
-  "📖 Mais um capítulo escrito no livro das lamentações, {name}!",
-  "✨ Tá lá! Continue arrasando, {name} (mas com moderação, por favor).",
-  "🪦 Feito, {name}! O dinheiro não volta, mas pelo menos a lembrança fica.",
-  "🍿 Agora é só aproveitar, {name}... se sobrou algo na conta, claro.",
-  "😌 Pode respirar fundo, {name}. Tá salvo! Gaste sem culpa.",
-  "🥳 Gastar dá uma felicidade, né {name}? Já anotei aqui!",
-  "🤑 Meu Deus do céu, {name}! Seu dinheiro parece que não tem fim kkk",
-  "👋 Adeus, suado dinheirinho do {name}... foi bom enquanto durou.",
-  "🪽 E lá se vai mais um... {name}, seu dinheiro criou asas!",
-  "💳 Olha {name}... o cartão chora, mas a gente sorri!",
-  "🤡 Economizar pra quê, {name}? A gente só vive uma vez mesmo!",
-  "📉 Lá vamos nós, {name}... mais umzinho pra conta do prejuízo!",
-  "👑 É {name}, a gente se sente rico só por 5 minutos após o salário, né?",
-  "🥊 O boleto que lute, {name}! O importante é a gente viver a vida.",
-  "💅 Anotadíssimo! Essa ostentação foi registrada com sucesso, {name}!",
-  "🏥 Como a gente sempre diz, {name}: o importante é ter saúde!",
-  "⏳ Atenção, {name}: Saldo diminuindo em 3, 2, 1...",
-  "🍷 Fino senhores! {name} fazendo mais um gasto chique por aqui.",
-  "🛸 É, {name}... e lá se foi o dinheiro pro espaço sideral...",
-];
-
-const getRandomFunnyPhrase = (name: string) => {
-  const phrase = funnySuccessPhrases[Math.floor(Math.random() * funnySuccessPhrases.length)];
-  return phrase.replace(/{name}/g, name || 'chefe');
-};
-
 export default function VoiceGastoPage() {
   const { data: session, status: sessionStatus } = useSession();
   const router = useRouter();
 
-  const [isRecording, setIsRecording] = useState(false);
-  const [transcript, setTranscript] = useState('');
+  const {
+    isRecording,
+    transcript,
+    setTranscript,
+    startRecording,
+    stopRecording,
+    isSupported
+  } = useSpeechRecognition();
+
   const [status, setStatus] = useState('Conte para o Gastão a data do seu gasto, o valor, a descrição e a forma de pagamento');
   const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -78,10 +57,8 @@ export default function VoiceGastoPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
   
-  const recognitionRef = useRef<any>(null);
   const statusTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const loadingIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const settingsPanelRef = useRef<HTMLDivElement>(null);
   const settingsButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -123,60 +100,28 @@ export default function VoiceGastoPage() {
     return () => window.removeEventListener('keydown', handleEsc);
   }, []);
 
-  // Initialize Speech Recognition
+  // Sync status and handle confirmation with hook state
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        recognitionRef.current = new SpeechRecognition();
-        recognitionRef.current.continuous = true;
-        recognitionRef.current.lang = 'pt-BR';
-        recognitionRef.current.interimResults = true;
-        recognitionRef.current.maxAlternatives = 1;
-
-        recognitionRef.current.onstart = () => {
-          setIsRecording(true);
-          setStatus('Ouvindo... (pode falar no seu tempo)');
-        };
-
-        recognitionRef.current.onresult = (event: any) => {
-          let currentTranscript = '';
-          for (let i = 0; i < event.results.length; i++) {
-            currentTranscript += event.results[i][0].transcript;
-          }
-          setTranscript(currentTranscript);
-
-          if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
-
-          silenceTimeoutRef.current = setTimeout(() => {
-            if (recognitionRef.current) recognitionRef.current.stop();
-          }, 2000); // 2 segundos de silêncio encerram a gravação
-        };
-
-        recognitionRef.current.onerror = (event: any) => {
-          setIsRecording(false);
-          if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
-          setStatus(`Erro: ${event.error}`);
-        };
-
-        recognitionRef.current.onend = () => {
-          setIsRecording(false);
-          if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
-          setStatus('Confirme o texto reconhecido.');
-          setAwaitingConfirmation(true);
-        };
-      } else {
-        setStatus('Reconhecimento de fala não é suportado neste navegador.');
-      }
+    if (isRecording) {
+      setStatus('Ouvindo... (pode falar no seu tempo)');
+    } else if (transcript && !awaitingConfirmation && !isRecording && status.includes('Ouvindo')) {
+      setStatus('Confirme o texto reconhecido.');
+      setAwaitingConfirmation(true);
     }
-  }, []);
+  }, [isRecording, transcript, awaitingConfirmation, status]);
+
+  // Handle browser support
+  useEffect(() => {
+    if (!isSupported) {
+      setStatus('Reconhecimento de fala não é suportado neste navegador.');
+    }
+  }, [isSupported]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (statusTimeoutRef.current) clearTimeout(statusTimeoutRef.current);
       if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current);
-      if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
     };
   }, []);
 
@@ -185,15 +130,13 @@ export default function VoiceGastoPage() {
       setStatus('Faça login primeiro.');
       return;
     }
-    if (isRecording && recognitionRef.current) {
-      recognitionRef.current.stop();
-      return;
-    }
-    if (recognitionRef.current && !isRecording) {
+    if (isRecording) {
+      stopRecording();
+    } else {
       setTranscript('');
       setStatus('');
       setAwaitingConfirmation(false);
-      recognitionRef.current.start();
+      startRecording();
     }
   };
 
@@ -845,7 +788,7 @@ export default function VoiceGastoPage() {
             {!awaitingConfirmation ? (
               <MicButton
                 onClick={handleMicButtonClick}
-                disabled={!recognitionRef.current || isRecording}
+                disabled={!isSupported || isRecording}
                 recording={isRecording}
               >
                 <MicIcon recording={isRecording} />

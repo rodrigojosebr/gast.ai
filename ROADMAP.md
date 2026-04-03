@@ -73,10 +73,17 @@ O objetivo é criar um sistema real de sessão e login.
     - Atualizar APIs para extraírem o `userId` exclusivamente da sessão segura.
 
 ## 📊 7. Dashboard e Gestão de Gastos (CRUD)
-O objetivo é permitir a visualização e exclusão de gastos (features inviáveis no KV).
+O objetivo é permitir a visualização, edição e exclusão de gastos, além da filtragem inteligente por período.
 
 - [x] **7.1 Endpoint de Listagem e Deleção**
 - [x] **7.2 Interface do Dashboard**
+- [ ] **7.3 Filtro de Período na Listagem**
+    - Adicionar seletor de meses na UI do Dashboard (ex: Mês Atual, Mês Anterior).
+    - Atualizar o endpoint `GET /api/gasto` para aceitar `from` e `to` (query params), garantindo que a API só retorne os gastos do período selecionado e calcule o Total apenas daquele mês.
+- [ ] **7.4 Edição de Gastos**
+    - Criar interface de edição (Modal/Expandir card) listando Descrição, Valor, Data e Forma de Pagamento em inputs padrão.
+    - Criar endpoint `PUT /api/gasto/[id]` utilizando o `expenseSchema` do Zod para garantir validação.
+    - Atualizar o `ExpenseRepository` com o método `update`.
 
 ## 🤖 8. Inteligência Artificial (Gemini AI)
 O objetivo é substituir a lógica frágil de Regex por um LLM capaz de interpretar contexto, gírias e valores complexos falados pelo usuário.

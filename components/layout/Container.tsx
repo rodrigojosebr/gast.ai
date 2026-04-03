@@ -12,9 +12,12 @@ export const Container = ({ children }: { children: React.ReactNode }) => (
       alignItems: 'center',
       minHeight: '100vh',
       padding: '2rem',
+      paddingTop: 'calc(2rem + env(safe-area-inset-top))',
+      paddingBottom: 'calc(2rem + env(safe-area-inset-bottom))',
       boxSizing: 'border-box',
       overflowY: 'auto',
       position: 'relative',
+      overscrollBehaviorY: 'contain',
     })}
   >
     {children}

@@ -1,80 +1,85 @@
 # 💰 Gast.ai
 
-Um assistente financeiro moderno, *voice-first*, focado na facilidade de registrar despesas do dia a dia. Chega de planilhas complicadas: apenas aperte um botão, fale o que gastou no seu tempo e deixe a Inteligência Artificial fazer o resto.
+O **Gast.ai** é um assistente financeiro moderno e inteligente, *voice-first*, projetado para simplificar drasticamente o registro de despesas diárias. Esqueça planilhas complexas ou aplicativos com menus infinitos: basta abrir o app, falar o que gastou e deixar que a Inteligência Artificial cuide do resto.
 
-Atualmente em fase de MVP (usando Vercel KV) e em transição ativa para uma arquitetura robusta Multi-usuário SaaS (PostgreSQL + Prisma).
+O projeto evoluiu de um MVP simples para uma plataforma SaaS multi-usuário robusta, utilizando uma arquitetura escalável e tecnologias de ponta.
 
 ---
 
 ## ✨ Funcionalidades em Destaque
 
-*   **🎙️ Registro por Voz (Voice-First):** Pressione o microfone e diga coisas como *"Ontem gastei 35 reais de Uber no cartão de crédito"*. O app entende linguagem natural, gírias e datas relativas, possuindo um "silêncio inteligente" que aguarda o usuário terminar de falar.
-*   **🤖 Extração com IA (Google Gemini):** Alimentado pelo modelo `gemini-2.5-flash-lite`, o sistema extrai automaticamente o valor (em centavos e formatado em R$), a descrição exata, a data (suportando fuso horário local) e o método de pagamento (Crédito, Débito, Pix, Dinheiro), corrigindo falhas de STT no processo.
-*   **🤵‍♂️ Gastão - Seu Consultor Financeiro:** O mascote do app usa IA para analisar seus gastos de forma bem-humorada, irônica e inteligente, alertando sobre padrões de gastos diretamente na interface usando um efeito de digitação em tempo real (streaming).
-*   **💡 Feedback Financeiro Imediato:** Assim que o gasto é salvo, você recebe um "choque de realidade" animado informando o total que você já gastou naquele mês.
-*   **📱 Instalação Cross-Platform (PWA):** O aplicativo se comporta como um app nativo. Possui um botão de instalação inteligente que aciona o prompt nativo no Android ou um tutorial de instalação elegante no iOS (Safari).
-*   **🎨 UI/UX Moderna e Fluida:** Construído com Next.js (App Router) e estilizado usando **PandaCSS** (zero-runtime CSS-in-JS), com animações de carregamento (`fadeIn`, `slideDown`), modais de análise com rolagem otimizada e feedback visual claro para o usuário.
-*   **📊 Exportação de Dados:** Geração de relatórios mensais em `.csv` (Data; Valor; Descrição; Método de Pagamento) compatíveis com Excel.
+*   **🎙️ Registro por Voz Inteligente:** Pressione o microfone e fale naturalmente: *"Paguei 50 reais de gasolina no Pix agora pouco"*. O app entende gírias, contextos e datas relativas (ex: "ontem", "anteontem").
+*   **🤖 Cérebro Gemini AI:** Alimentado pelo modelo `gemini-2.0-flash-lite`, o sistema realiza o parsing do áudio para JSON estruturado, extraindo valor, descrição, categoria e método de pagamento com precisão, corrigindo automaticamente erros de transcrição.
+*   **🤵‍♂️ Gastão - Seu Mentor Sarcástico:** O "Gastão" analisa seu comportamento financeiro em tempo real. Ele fornece feedbacks bem-humorados e análises críticas sobre seus gastos via streaming de texto, ajudando você a refletir antes da próxima compra.
+*   **📊 Dashboard & Gestão:** Visualize todos os seus gastos em uma interface limpa e organizada. Edite ou exclua registros com facilidade e acompanhe seu total mensal acumulado.
+*   **📱 PWA (Progressive Web App):** Instale o Gast.ai na tela inicial do seu celular (Android ou iOS) para uma experiência de app nativo, com carregamento instantâneo e ícone dedicado.
+*   **🔐 Autenticação Segura:** Sistema completo de login e cadastro integrado ao NextAuth.js, garantindo que seus dados financeiros sejam privados e acessíveis apenas por você.
+*   **🌐 Fuso Horário Inteligente:** O app detecta automaticamente sua localização para garantir que gastos feitos próximos à meia-noite sejam registrados no dia correto do seu calendário local.
+
+---
+
+## 🛠️ Stack Tecnológica
+
+*   **Framework:** [Next.js 15+](https://nextjs.org/) (App Router)
+*   **Linguagem:** [TypeScript](https://www.typescriptlang.org/)
+*   **IA:** [Google Gemini SDK](https://ai.google.dev/)
+*   **Estilização:** [PandaCSS](https://panda-css.com/) (Type-safe, zero-runtime CSS-in-JS)
+*   **Banco de Dados:** [PostgreSQL](https://www.postgresql.org/) (via [Neon Serverless](https://neon.tech/))
+*   **ORM:** [Prisma](https://www.prisma.io/)
+*   **Autenticação:** [Auth.js](https://authjs.dev/) (NextAuth)
+*   **Validação:** [Zod](https://zod.dev/)
 
 ---
 
 ## 🚀 Como Rodar Localmente
 
-### 1. Pré-requisitos
-*   Node.js (versão 20 ou superior)
-*   Conta na Vercel (para provisionar o banco de dados KV)
-*   Chave de API do Google Gemini (`GEMINI_API_KEY`)
-
-### 2. Configuração Inicial
-
-Clone o repositório e instale as dependências:
+### 1. Clonar e Instalar
 ```bash
 git clone <URL_DO_REPOSITORIO>
-cd gastos-kv-mvp
+cd gast-ai
 npm install
 ```
 
-Configure o PandaCSS e gere a pasta `styled-system/`:
+### 2. Variáveis de Ambiente
+Crie um arquivo `.env` na raiz do projeto (use o `.env.example` como base):
 ```bash
-npm run prepare
+# Banco de Dados
+DATABASE_URL="postgresql://user:password@neon-host/dbname?sslmode=require"
+
+# Inteligência Artificial
+GEMINI_API_KEY="sua_chave_do_google_ai_studio"
+
+# Autenticação
+NEXTAUTH_SECRET="uma_string_aleatoria_segura"
+NEXTAUTH_URL="http://localhost:3000"
 ```
 
-### 3. Variáveis de Ambiente (`.env.local`)
-Copie o arquivo de exemplo e configure suas chaves:
+### 3. Preparar o Banco de Dados
+Gere o cliente do Prisma e sincronize as tabelas:
 ```bash
-cp .env.example .env.local
+npx prisma generate
+npx prisma db push
 ```
 
-Dentro de `.env.local`, você precisará configurar:
-1.  **Chave da IA:** Insira sua `GEMINI_API_KEY` gerada no Google AI Studio.
-2.  **Chave do Banco de Dados:** Adicione o `KV_REST_API_URL` e `KV_REST_API_TOKEN` gerados pelo seu banco KV na Vercel.
-3.  **Variáveis de Ambiente Adicionais:** Defina o `NEXTAUTH_SECRET` (pode ser qualquer string aleatória para criptografar as sessões) e o `NEXTAUTH_URL` (ex: `http://localhost:3000`).
-4.  **Usuários de Teste:** O sistema agora possui um fluxo completo de Cadastro e Login. Para testes rápidos, você pode popular o banco com usuários padrão rodando `npx prisma db seed`.
-
-### 4. Rodando a Aplicação
-Execute o servidor de desenvolvimento:
+### 4. Iniciar o Desenvolvimento
 ```bash
 npm run dev
 ```
-Acesse `http://localhost:3000/voice` no seu navegador (de preferência no celular para testar a responsividade e o microfone).
 
 ---
 
-## 🏗️ Arquitetura Atual e Próximos Passos
+## 🏗️ Arquitetura do Projeto
 
-O projeto segue a arquitetura **Clean Code**, separando claramente as camadas de Apresentação (UI), Regras de Negócio (Serviços de IA) e Acesso a Dados (Repositório).
+O Gast.ai segue o **Repository Pattern** e princípios de **Clean Architecture** para garantir manutenibilidade:
 
-Neste exato momento, concluímos as fases de Estilização (PandaCSS) e Inteligência Artificial (Gemini).
-
-**Próxima Fase Imediata:**
-Migração da base de dados (que hoje é NoSQL via Vercel KV) para **PostgreSQL Serverless (Neon)** usando o Prisma ORM, garantindo integridade de dados multi-usuário e abrindo caminho para o Dashboard administrativo. Acompanhe o arquivo `ROADMAP.md` para visualizar o status de cada etapa.
+*   `/app`: Rotas, páginas e API Handlers do Next.js.
+*   `/components`: UI Components organizados por responsabilidade (layout, features, ui).
+*   `/repositories`: Camada de abstração de dados (isolando o Prisma do restante da lógica).
+*   `/services`: Lógica de negócio complexa (ex: Integração com Gemini, Cálculos de IA).
+*   `/schemas`: Validação de contratos de dados usando Zod.
+*   `/hooks`: Lógica de estado reutilizável (Voz, Autenticação, etc).
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
-
-*   **Core:** Next.js (App Router) + TypeScript
-*   **Estilização:** PandaCSS
-*   **IA Parser:** Google Gemini SDK (`@google/genai`)
-*   **Banco de Dados (Atual):** Vercel KV (Redis)
-*   **Banco de Dados (Futuro):** Neon PostgreSQL + Prisma
+## 🗺️ Roadmap
+Para detalhes sobre o progresso do desenvolvimento e próximas tasks, consulte o arquivo [ROADMAP.md](./ROADMAP.md).
